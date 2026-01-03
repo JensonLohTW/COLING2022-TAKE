@@ -129,6 +129,18 @@ def load_split(dataset, file):
                     test.add(temp[0])
         return train, dev, test
 
+    elif dataset == "tiage":
+        test = set()
+        with codecs.open(file, encoding='utf-8') as f:
+            for line in f:
+                temp = line.strip('\n').strip('\r').split('\t')
+                assert len(temp) == 2, "query_id train/test"
+                if temp[1] == 'train':
+                    train.add(temp[0])
+                elif temp[1] == 'test':
+                    test.add(temp[0])
+        return train, dev, test
+
 
 def split_data(dataset, split_file, episodes):
     print("split_data:", dataset)
@@ -158,6 +170,16 @@ def split_data(dataset, split_file, episodes):
                 train_episodes.append(episode)
             elif episode[0]['query_id'] in dev:
                 dev_episodes.append(episode)
+            elif episode[0]['query_id'] in test:
+                test_episodes.append(episode)
+        return train_episodes, dev_episodes, test_episodes
+
+    elif dataset == "tiage":
+        train, dev, test = load_split(dataset, split_file)
+        test_episodes = list()
+        for episode in episodes:
+            if episode[0]['query_id'] in train:
+                train_episodes.append(episode)
             elif episode[0]['query_id'] in test:
                 test_episodes.append(episode)
         return train_episodes, dev_episodes, test_episodes

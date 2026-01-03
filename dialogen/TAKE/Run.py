@@ -41,18 +41,25 @@ def train(args):
                                                                    gpt2_data_path + args.dataset + '.query'
                                                                    )
 
-        train_episodes_gpt2, dev_episodes_gpt2, test_seen_episodes_gpt2, test_unseen_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
+        if args.dataset == "wizard_of_wikipedia":
+            train_episodes_gpt2, dev_episodes_gpt2, test_seen_episodes_gpt2, test_unseen_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
+        elif args.dataset == "tiage":
+            train_episodes_gpt2, dev_episodes_gpt2, test_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
+            test_seen_episodes_gpt2 = test_episodes_gpt2
+            test_unseen_episodes_gpt2 = []
+        else:
+            train_episodes_gpt2, dev_episodes_gpt2, test_seen_episodes_gpt2, test_unseen_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
 
         torch.save(test_seen_episodes_gpt2, gpt2_data_path + 'test_seen_TAKE.pkl')
         torch.save(test_unseen_episodes_gpt2, gpt2_data_path + 'test_unseen_TAKE.pkl')
         torch.save(query_gpt2, gpt2_data_path + 'query_TAKE.pkl')
         torch.save(passage_gpt2, gpt2_data_path + 'passage_TAKE.pkl')
-        torch.save(train_episodes, gpt2_data_path + 'train_TAKE.pkl')
+        torch.save(train_episodes_gpt2, gpt2_data_path + 'train_TAKE.pkl')
 
 
     #gen dataset
     gpt2_train_dataset = gpt2Dataset(args.mode, train_samples_gpt2, query_gpt2, passage_gpt2, None, args.segment, args.max_episode_length,
-                                        args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, args=args)
+                                        args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, args=args, dataset=args.dataset)
 
     gpt2tokenizer = gpt2_train_dataset.tokenizer
     model = GPT2_gen(gpt2tokenizer, args)
@@ -84,7 +91,7 @@ def train(args):
     #train gen net
     for i in range(last_epoch+1, args.gen_epoches): 
         gpt2_train_dataset = gpt2Dataset(args.mode, train_samples_gpt2, query_gpt2, passage_gpt2, None, args.segment, args.max_episode_length,
-                                        args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, i, args=args)
+                                        args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, i, args=args, dataset=args.dataset)
 
         args.train_batch_size = 4
         args.accumulation_steps = 16
@@ -122,7 +129,15 @@ def inference(args):
                                                                    gpt2_data_path + args.dataset + '.query'
                                                                    )
 
-        train_episodes, dev_episodes, test_seen_episodes_gpt2, test_unseen_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
+        if args.dataset == "wizard_of_wikipedia":
+            train_episodes, dev_episodes, test_seen_episodes_gpt2, test_unseen_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
+        elif args.dataset == "tiage":
+            train_episodes, dev_episodes, test_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
+            test_seen_episodes_gpt2 = test_episodes_gpt2
+            test_unseen_episodes_gpt2 = []
+        else:
+            train_episodes, dev_episodes, test_seen_episodes_gpt2, test_unseen_episodes_gpt2 = split_data(args.dataset, gpt2_data_path + args.dataset + '.split', episodes)
+
         print("The number of test_seen_episodes:", len(test_seen_episodes_gpt2))
         print("The number of test_unseen_episodes:", len(test_unseen_episodes_gpt2))
         torch.save(test_seen_episodes_gpt2, gpt2_data_path + 'test_seen_TAKE.pkl')
@@ -163,10 +178,10 @@ def inference(args):
 
     
     gpt2_ts_seen_dataset = gpt2Dataset(args.mode, test_seen_episodes_gpt2, query_gpt2, passage_gpt2, ts_seen_ks_pred, args.segment, args.max_episode_length,
-                                         args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, args=args)
+                                         args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, args=args, dataset=args.dataset)
 
     gpt2_ts_unseen_dataset = gpt2Dataset(args.mode, test_unseen_episodes_gpt2, query_gpt2, passage_gpt2, ts_unseen_ks_pred, args.segment, args.max_episode_length,
-                                         args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, args=args)
+                                         args.knowledge_truncate, args.text_truncate, args.gpt2_truncate, args=args, dataset=args.dataset)
     gpt2tokenizer = gpt2_ts_seen_dataset.tokenizer
 
 
@@ -213,8 +228,8 @@ if __name__ == '__main__':
     parser.add_argument("--name", type=str, default='TAKE')
     parser.add_argument("--base_output_path", type=str, default='output/')
     parser.add_argument("--base_data_path", type=str, default='datasets/')
-    parser.add_argument("--gpt2_data_path", type=str, default='datasets/wow_gpt2/')
-    parser.add_argument("--dataset", type=str, default='wizard_of_wikipedia')
+    parser.add_argument("--gpt2_data_path", type=str, default='datasets/tiage/')
+    parser.add_argument("--dataset", type=str, default='tiage')
     parser.add_argument("--GPU", type=int, default=2)
 
     parser.add_argument("--mode", type=str, default='train')

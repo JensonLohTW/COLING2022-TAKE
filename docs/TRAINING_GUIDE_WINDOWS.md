@@ -4,6 +4,42 @@
 
 ---
 
+## 🚀 快速开始 - 使用脚本（推荐）
+
+项目提供了预配置的脚本，可以一键执行各项操作：
+
+### 可用脚本列表
+
+| 脚本 | 说明 |
+|------|------|
+| [`setup_env.bat`](../scripts/setup_env.bat) | 环境设置 - 创建虚拟环境并安装依赖 |
+| [`train_take_tiage.bat`](../scripts/train_take_tiage.bat) | 训练脚本 - 使用 tiage 数据集训练 TAKE 模型 |
+| [`infer_take_tiage.bat`](../scripts/infer_take_tiage.bat) | 推论脚本 - 使用训练好的模型进行评估 |
+| [`pipeline_take_tiage.bat`](../scripts/pipeline_take_tiage.bat) | 完整流程 - DGCN3 导出 → 训练 → 推论 |
+| [`ablation_take_tiage.bat`](../scripts/ablation_take_tiage.bat) | 消融实验 - 对比不同特征配置效果 |
+
+### PowerShell 用户
+
+如果你使用 PowerShell，可以使用 `.ps1` 版本的脚本：
+- [`train_take_tiage.ps1`](../scripts/train_take_tiage.ps1)
+
+### 一键使用
+
+```powershell
+# 1. 设置环境（首次使用）
+.\scripts\setup_env.bat
+
+# 2. 训练模型
+.\scripts\train_take_tiage.bat
+
+# 3. 推论评估
+.\scripts\infer_take_tiage.bat
+```
+
+> **注意**: 脚本使用的数据集是 `tiage`（对话网络数据集），这是项目当前配置的默认数据集。
+
+---
+
 ## 目录
 
 1. [环境准备](#一环境准备)

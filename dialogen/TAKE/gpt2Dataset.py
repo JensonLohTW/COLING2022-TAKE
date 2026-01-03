@@ -6,7 +6,7 @@ from transformers import GPT2PreTrainedModel, GPT2Model, GPT2Config, GPT2Tokeniz
 import torch
 
 class gpt2Dataset(Dataset):
-    def __init__(self, mode, episodes, query, passage, pred, segment=True, max_episode_length=None, knowledge_truncate=64, text_truncate=128, block_size=256, epoch=0, args=None):  # 1e10=1E10
+    def __init__(self, mode, episodes, query, passage, pred, segment=True, max_episode_length=None, knowledge_truncate=64, text_truncate=128, block_size=256, epoch=0, args=None, dataset="tiage"):  # 1e10=1E10
         super(Dataset, self).__init__()
         self.args = args
         self.mode = mode
@@ -18,7 +18,8 @@ class gpt2Dataset(Dataset):
         self.passage = passage
         self.pred = pred
         self.segment = segment
-        self.answer_file = './datasets/wizard_of_wikipedia/wizard_of_wikipedia.answer'
+        self.dataset = dataset
+        self.answer_file = f'./datasets/{dataset}/{dataset}.answer'
 
         self.episode_tensor = []
 
