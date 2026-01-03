@@ -192,6 +192,8 @@ sequenceDiagram
 
 ### 5.3 快速開始
 
+#### Linux / macOS
+
 ```bash
 # 1. 設置環境
 ./scripts/setup_env.sh
@@ -208,6 +210,27 @@ sequenceDiagram
 # 5. 訓練 GPT-2 對話生成模型
 ./scripts/train_dialogen_tiage.sh
 ```
+
+#### Windows (CMD / PowerShell)
+
+```batch
+REM 1. 設置環境
+scripts\setup_env.bat
+
+REM 2. 訓練話題轉移檢測模型
+scripts\train_take_tiage.bat
+
+REM 3. 執行推論並獲取評價指標
+scripts\infer_take_tiage.bat
+
+REM 4. 運行消融實驗（可選）
+scripts\ablation_take_tiage.bat
+
+REM 5. 訓練 GPT-2 對話生成模型
+scripts\train_dialogen_tiage.bat
+```
+
+> **提示**: Windows 用戶也可以使用 PowerShell 腳本 `train_take_tiage.ps1`
 
 ---
 
@@ -314,18 +337,36 @@ knowSelect/datasets/tiage/
 
 ### Q1: 如何查看評價指標？
 
+**Linux/Mac:**
 ```bash
 cat knowSelect/output/TAKE_tiage_all_feats/metrics/shift_metrics.json
 ```
 
+**Windows:**
+```batch
+type knowSelect\output\TAKE_tiage_all_feats\metrics\shift_metrics.json
+```
+
 ### Q2: 如何查看 Top-K 高中心性句子？
 
+**Linux/Mac:**
 ```bash
 head -10 knowSelect/output/TAKE_tiage_all_feats/metrics/shift_top3.jsonl
 ```
 
+**Windows (PowerShell):**
+```powershell
+Get-Content knowSelect\output\TAKE_tiage_all_feats\metrics\shift_top3.jsonl -First 10
+```
+
 ### Q3: 消融實驗結果在哪裡？
 
+**Linux/Mac:**
 ```bash
 cat knowSelect/output/TAKE_tiage_all_feats/metrics/ablation_results.csv
+```
+
+**Windows:**
+```batch
+type knowSelect\output\TAKE_tiage_all_feats\metrics\ablation_results.csv
 ```
