@@ -1,0 +1,98 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虛擬環境
+venv/
+env/
+.venv/
+ENV/
+
+# PyTorch 模型檔案
+*.pkl
+*.pt
+*.pth
+*.bin
+
+# 日誌與暫存檔案
+*.log
+*.tmp
+*.cache
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# 資料集（太大不上傳）
+knowSelect/datasets/wizard_of_wikipedia/*.pkl
+knowSelect/datasets/wizard_of_wikipedia/*.answer
+knowSelect/datasets/wizard_of_wikipedia/*.passage
+knowSelect/datasets/wizard_of_wikipedia/*.pool
+knowSelect/datasets/wizard_of_wikipedia/*.query
+knowSelect/datasets/wizard_of_wikipedia/*.split
+
+dialogen/datasets/wizard_of_wikipedia/*.pkl
+dialogen/datasets/wizard_of_wikipedia/*.answer
+dialogen/datasets/wizard_of_wikipedia/*.passage
+dialogen/datasets/wizard_of_wikipedia/*.pool
+dialogen/datasets/wizard_of_wikipedia/*.query
+dialogen/datasets/wizard_of_wikipedia/*.split
+dialogen/datasets/wizard_of_wikipedia/*.qrel
+
+dialogen/datasets/wow_gpt2/*.pkl
+dialogen/datasets/wow_gpt2/*.answer
+dialogen/datasets/wow_gpt2/*.passage
+dialogen/datasets/wow_gpt2/*.pool
+dialogen/datasets/wow_gpt2/*.query
+dialogen/datasets/wow_gpt2/*.split
+dialogen/datasets/wow_gpt2/*.qrel
+
+# 輸出目錄（模型檢查點太大）
+knowSelect/output/TAKE_WoW/model/*.pkl
+knowSelect/output/TAKE_WoW/ks_pred/
+dialogen/output/TAKE_WoW/gen_model/*.pkl
+dialogen/output/TAKE_WoW/result_gen/
+dialogen/output/TAKE_WoW/ks_pred/
+
+# Serena（本地工具）
+.serena/
+
+# Claude Code（本地工具）
+.claude/
+
+# 保留 demo 專案（取消忽略）
+!demo/
+!demo/DGCN3/
+!demo/DGCN3/**
+!demo/tiage-1/
+!demo/tiage-1/**
