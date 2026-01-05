@@ -22,8 +22,8 @@
 - **補充資料（節點對應文本/標籤）**：`demo/tiage-1/outputs_nodes/tiage_anno_nodes_all.csv`  
   - 保存**所有節點**對應的文本與話題轉移標籤，用於與中心性做對齊（並在 TAKE 系統中用來計算 6 維結構特徵）。
 - **換新資料集時**：至少需要替換三個「資料依賴」：
-  1) `datasets/raw_data/<dataset>`（時間切片邊列表）  
-  2) `sir_results/<dataset>`（SIR 真實標籤）  
+  1) `demo/DGCN3/datasets/raw_data/<dataset>`（時間切片邊列表）  
+  2) `demo/DGCN3/sir_results/<dataset>`（SIR 真實標籤）  
   3) `demo/<dataset>-1/outputs_nodes/<dataset>_anno_nodes_all.csv`（節點→文本/標籤映射）  
   中心性可以由程式重新計算（輸出目錄可重新產生）。
 
@@ -45,9 +45,9 @@
 ```mermaid
 flowchart TB
   subgraph Inputs["輸入"]
-    A["datasets/raw_data/tiage/<br/>tiage_0.txt ~ tiage_9.txt"] --> P
-    B["sir_results/tiage/<br/>tiage_{t}_a[1.5].csv"] --> P
-    M["model_registry/<br/>node_importance_tiage.pkl"] --> I
+    A["demo/DGCN3/datasets/raw_data/tiage/<br/>tiage_0.txt ~ tiage_9.txt"] --> P
+    B["demo/DGCN3/sir_results/tiage/<br/>tiage_{t}_a[α].csv"] --> P
+    M["demo/DGCN3/model_registry/<br/>node_importance_tiage.pkl"] --> I
   end
 
   subgraph Preprocess["預處理（data.py）"]
@@ -87,7 +87,7 @@ flowchart TB
 - **路徑**：`demo/DGCN3/datasets/raw_data/tiage/`
 - **檔名規則（必要）**：需能以 `_{t}.txt` 解析出時間切片 `t`  
   - 目前程式排序邏輯：`int(filename.split('_')[1].split('.txt')[0])`
-  - 建議命名：`tiage_0.txt, tiage_1.txt, ...`
+- 建議命名：`<dataset>_0.txt, <dataset>_1.txt, ...`（本文件以 `tiage_0.txt ~ tiage_9.txt` 示範）
 - **檔案內容格式（必要）**：
   - 每行至少兩個整數 `u v`，以空白分隔（空白或 tab 均可）
   - 代表一條邊（無向圖）；自迴圈（`u==v`）會被忽略
@@ -103,8 +103,8 @@ flowchart TB
 ### 3.2 真實標籤（sir_results/tiage）
 
 - **路徑**：`demo/DGCN3/sir_results/tiage/`
-- **檔名規則（必要）**：`tiage_{t}_a[{α}].csv`  
-  - 例如：`tiage_0_a[1.5].csv`
+- **檔名規則（必要）**：`<dataset>_{t}_a[{α}].csv`  
+  - 例如（tiage）：`tiage_0_a[1.5].csv`
 - **CSV 欄位（必要）**：
   - `Node`：節點 ID（整數）
   - `SIR`：SIR 值（浮點數）
@@ -119,8 +119,13 @@ Node,SIR
 
 重要注意事項：
 
-- **即使只做推論輸出中心性，目前資料載入仍強制讀取 SIR 標籤檔**。也就是說，`sir_results/tiage/` 必須完整存在，否則會直接拋出 `FileNotFoundError`。
+- **即使只做推論輸出中心性，目前資料載入仍強制讀取 SIR 標籤檔**。也就是說，`demo/DGCN3/sir_results/tiage/` 必須完整存在，否則會直接拋出 `FileNotFoundError`。
 - `α`（在檔名中寫作 `a[α]`）是用來索引標籤檔的關鍵參數；若你要測多個 `α`，每個 `α` 都需要對應一組完整的 `tiage_{t}_a[α].csv`。
+
+補充（依目前 `demo/` 實際資料）：
+
+- `demo/DGCN3/datasets/raw_data/tiage/`：共有 **10 個時間切片**（`tiage_0.txt ~ tiage_9.txt`）
+- `demo/DGCN3/sir_results/tiage/`：共有 **100 個 CSV**，對應 **10 個切片 × 10 個 α**（目前可見 `α=1.0~1.9`）
 
 ### 3.3 節點→文本/標籤映射（tiage_anno_nodes_all.csv）
 
@@ -135,11 +140,11 @@ Node,SIR
   - `text`（字串）
   - `shift_label`（-1/0/1）
 
-### 3.4 中心性輸出（Centrality/alpha_1.5）
+### 3.4 中心性輸出（Centrality/alpha_{α}）
 
 - **輸出根目錄**：`demo/DGCN3/Centrality/`
 - **輸出子目錄**：`alpha_{α}`（例如 `alpha_1.5`）
-- **檔名**：`tiage_{t}.csv`
+- **檔名**：`<dataset>_{t}.csv`（本文件以 `tiage_{t}.csv` 示範）
 - **檔案內容格式**：
   - 兩欄、以逗號分隔：`node_id,centrality`
   - **無表頭**
@@ -174,8 +179,8 @@ Node,SIR
 flowchart TB
   subgraph Data["資料"]
     A["tiage_anno_nodes_all.csv<br/>node_id/dialog_id/turn_id/text/shift_label"]
-    B["Centrality/alpha_1.5/<br/>tiage_0.csv~tiage_9.csv"]
-    C["raw_data/tiage/<br/>tiage_0.txt~tiage_9.txt"]
+    B["demo/DGCN3/Centrality/alpha_<α>/<br/>tiage_0.csv~tiage_9.csv"]
+    C["demo/DGCN3/datasets/raw_data/tiage/<br/>tiage_0.txt~tiage_9.txt"]
   end
 
   subgraph Loader["CentralityCommunityLoader"]
@@ -198,22 +203,30 @@ flowchart TB
 
 - `demo/DGCN3/model_registry/node_importance_tiage.pkl`（DGCN3 模型權重；目錄在 DGCN3 `.gitignore` 中，需自行放置）
 - `demo/DGCN3/datasets/raw_data/tiage/tiage_0.txt ~ tiage_9.txt`
-- `demo/DGCN3/sir_results/tiage/tiage_{t}_a[1.5].csv`（每個時間片都要有）
+- `demo/DGCN3/sir_results/tiage/tiage_{t}_a[α].csv`（每個時間片都要有；要測哪些 α 就需要哪些 α 的檔案，先用 1.5 驗證也可）
 
-### 5.2 執行（匯出 α=1.5 的中心性）
+### 5.2 執行（中心性匯出）
+
+快速驗證（α=1.5）：
 
 ```bash
 ./scripts/run_export_centrality_tiage.sh
 ```
 
+多 α 循環（共存輸出到 `Centrality/alpha_<α>/...`）：
+
+- 直接修改 `scripts/run_export_centrality_tiage.sh` 內的 `--alphas` 為逗號分隔清單，例如：
+  - `--alphas 1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9`
+
 底層實際做的事（僅供理解）：
 
-- `main.py export-centrality --dataset-name tiage --alphas 1.5`
-- 呼叫 `dgcn3_export_predictions.py`，輸出到 `demo/DGCN3/Centrality/alpha_1.5/`
+- `main.py export-centrality --dataset-name tiage --alphas <comma-separated>`
+- 呼叫 `dgcn3_export_predictions.py`，對每個 α 輸出到 `demo/DGCN3/Centrality/alpha_<α>/`
 
 ### 5.3 驗收（快速檢查點）
 
-- **檔案數量**：`demo/DGCN3/Centrality/alpha_1.5/` 下應有 `tiage_0.csv ~ tiage_9.csv`
+- **α=1.5（快速驗證）**：`demo/DGCN3/Centrality/alpha_1.5/` 下應有 `tiage_0.csv ~ tiage_9.csv`
+- **多 α（循環輸出）**：對每個 α，都應存在 `demo/DGCN3/Centrality/alpha_<α>/tiage_0.csv ~ tiage_9.csv`
 - **檔案格式**：每行兩欄、無表頭：`node_id,centrality`
 - **節點重複性（建議）**：跨時間片的 `node_id` 應無重複（避免後續特徵載入被覆蓋）  
   - 本倉庫已提供的範例輸出檢查結果：`tiage_0~9.csv` 之間 **node_id 無重複**（此點對資料對齊非常關鍵）
@@ -242,46 +255,121 @@ flowchart TB
 - `knowSelect/TAKE/CentralityLoader.py`：讀取中心性與邊列表時固定使用 `tiage_{slice}.csv` 與 `tiage_{slice}.txt`
 - `dgcn3_export_predictions.py`：輸出中心性時固定輸出 `tiage_{t}.csv`
 
-因此「換新資料集」在工程上有兩種做法（需要朋友確認採哪一種）：
+你已確認要採用 **做法 B（可維護）**：統一命名規則為 `<dataset>_*.{txt,csv}`，並讓程式全面支援 `<dataset>` 前綴（不再硬編碼 `tiage_...`）。
 
-#### 做法 A（最省事、0 改碼）：沿用 `tiage_*.{txt,csv}` 檔名規則
+需要補上的程式修改點（最小改動、可回滾）：
 
-- 你可以把新資料集的時間切片檔案**仍命名成** `tiage_0.txt ~ tiage_9.txt`
-- SIR 標籤檔也仍命名成 `tiage_{t}_a[α].csv`
-- 對外你在語義上叫它「新資料集」，但系統內仍當作 `tiage` 處理
-
-優點：不用改任何程式  
-缺點：語義混淆、可維護性差，容易日後對不上資料來源
-
-#### 做法 B（建議、可維護）：把「資料集前綴」參數化（需要改碼/改腳本）
-
-你原始描述的「換新資料集就換三個資料夾」比較接近這個做法，但目前程式未完全支援，需補上：
-
-- 修改 `dgcn3_export_predictions.py`：輸出檔名由 `tiage_{t}.csv` 改為 `<dataset>_{t}.csv`
-- 修改 `knowSelect/TAKE/CentralityLoader.py`：讀取檔名由 `tiage_{slice}.*` 改為 `<dataset>_{slice}.*`（例如新增 `dataset_prefix` 參數，預設 `tiage`）
-- 更新對應腳本（或在執行時傳入 dataset 參數）
-
-這樣你就能真的做到：換資料集只要「替換三個資料依賴 + 置換模型檔」，程式不需要再手動改硬編碼。
+- **`dgcn3_export_predictions.py`**
+  - **現況**：固定輸出 `tiage_{t}.csv`
+  - **目標**：輸出 `<dataset>_{t}.csv`（其中 `<dataset>` 取自 `--dataset_name`）
+- **`knowSelect/TAKE/CentralityLoader.py`**
+  - **現況**：固定讀取 `tiage_{slice}.csv`、`tiage_{slice}.txt`
+  - **目標**：讀取 `<dataset>_{slice}.csv`、`<dataset>_{slice}.txt`（其中 `<dataset>` 與 TAKE 參數 `--dataset` 一致）
+  - **建議做法**：在 `CentralityCommunityLoader.__init__()` 新增 `dataset_prefix: str`（預設 `tiage`），並在 `_load_centrality_for_slice()` / `_load_community_for_slice()` 統一使用該前綴
+- **`scripts/*.sh`**
+  - **現況**：`scripts/run_export_centrality_tiage.sh` 固定 `--dataset-name tiage`
+  - **目標**：提供可設定 dataset 與 `--alphas`（多 α）的方法（可用環境變數或新增一支泛用腳本）
 
 ---
 
 ## 七、驗收標準（Definition of Done）
 
-以「只處理 tiage、α=1.5」為準，滿足以下即視為完成：
+以「只處理 tiage、對多個 α 做循環」為準，滿足以下即視為完成：
 
-- `demo/DGCN3/Centrality/alpha_1.5/` 成功產生 `tiage_0.csv ~ tiage_9.csv`
+- 對每個 α，都在 `demo/DGCN3/Centrality/alpha_<α>/` 成功產生 `tiage_0.csv ~ tiage_9.csv`
 - 每個輸出檔符合格式：**無表頭**，每行 `node_id,centrality`
-- `sir_results/tiage/tiage_{t}_a[1.5].csv` 對每個 `t` 都存在（否則匯出會失敗）
+- `demo/DGCN3/sir_results/tiage/tiage_{t}_a[α].csv` 對每個 `t` 都存在（否則匯出會失敗）
 - （若下游走 TAKE）`knowSelect/TAKE/CentralityLoader.py` 能夠在不報錯的情況下讀入中心性與邊列表，並為 batch 產生 6 維特徵
 
 ---
 
-## 八、待確認問題
+## 八、關鍵決策（已確認）與時間切片策略（推薦）
 
-1. **中心性定義**：此處的中心性是否正確等同於「DGCN3 模型對 SIR 重要性的預測值」？還是你希望直接使用「真實 SIR 值」作為中心性？（目前系統是用模型預測值）
-2. **時間切片數**：tiage 是否固定 10 個切片（0~9）？若未來切片數改變，下游 TAKE 的 `num_slices` 也需要同步調整。
-3. **α 參數策略**：你希望：
-   - 只跑單一 α（先 1.5），還是
-   - 對多個 α 做循環測試並共存輸出（`Centrality/alpha_<α>/...`）？
-4. **換新資料集時的命名規範**：你希望維持 `tiage_*.csv/txt` 的檔名前綴（0 改碼），還是要工程化支援 `<dataset>_*.csv/txt`（需小幅改碼）？
+### 8.1 已確認決策
+
+1. **中心性定義**：中心性 = **DGCN3 模型對 SIR 重要性的預測值**（不是直接使用真實 SIR）
+2. **α 參數策略**：對 **多個 α 做循環測試**，並共存輸出（`Centrality/alpha_<α>/...`）
+3. **換新資料集命名規範**：採用 `<dataset>_*.{csv,txt}`，並修改程式移除 `tiage_...` 硬編碼
+
+### 8.2 時間切片策略（最適合做法：以 DGCN3 的 raw_data 為權威來源）
+
+#### 結論（直接可用）
+
+- **本流程（DGCN3 → Centrality → TAKE CentralityLoader）以 `demo/DGCN3/datasets/raw_data/<dataset>/` 的檔案清單為「時間切片權威來源」**。  
+  因為：
+  - DGCN3 的資料載入（`demo/DGCN3/data.py:get_data()`）讀的是這個目錄
+  - TAKE 的 `CentralityCommunityLoader` 做社群偵測也讀的是這個目錄
+- 依目前 `demo/` 現況：`demo/DGCN3/datasets/raw_data/tiage/` 只有 `tiage_0.txt ~ tiage_9.txt`，因此 **tiage 在本流程中定義為 10 個切片（0~9）**。
+
+#### `demo/tiage-1/tiage_slices_txt/tiage_10.txt` 的定位（避免誤用）
+
+`demo/tiage-1/tiage_slices_txt/` 是由 `demo/tiage-1/main.py` 產生的「空間網路」切片邊列表（kNN + MST + MST 補邊後再切片）。  
+該腳本目前以 `num_slices=10` 生成切片，因此理論上只會產生 `tiage_0.txt ~ tiage_9.txt`；目錄中出現的 `tiage_10.txt` 更像是**歷史殘留檔**（例如曾用不同參數生成後未清理），且 **並未被 DGCN3 / Centrality 流程使用**。
+
+> 推薦：把 `demo/tiage-1/tiage_slices_txt/` 視為「可視化/分析用資料」，不要把其中的 `tiage_10.txt` 直接當成 DGCN3 的 slice=10 輸入，除非你要做「整套切片數擴充」並補齊所有相依資料（見下節）。
+
+#### 時間切片一致性檢查（建議寫入驗收）
+
+對於某個 dataset 與某個 α，至少要滿足：
+
+- `demo/DGCN3/datasets/raw_data/<dataset>/` 的切片集合 = `S_raw`
+- `demo/DGCN3/sir_results/<dataset>/` 存在 `<dataset>_{t}_a[α].csv` 的切片集合 = `S_sir`
+- `demo/DGCN3/Centrality/alpha_<α>/` 存在 `<dataset>_{t}.csv` 的切片集合 = `S_cent`
+
+推薦驗收條件：
+
+- \(S_{raw} = S_{sir} = S_{cent}\)
+
+```mermaid
+flowchart TB
+  A["列出 raw slices<br/>demo/DGCN3/datasets/raw_data/<dataset>/"] --> B["列出 sir slices<br/>demo/DGCN3/sir_results/<dataset>/ (α 固定)"]
+  B --> C["列出 centrality slices<br/>demo/DGCN3/Centrality/alpha_<α>/"]
+  C --> D{S_raw = S_sir = S_cent ?}
+  D -->|是| OK["通過：切片對齊"]
+  D -->|否| NG["失敗：缺 slice 或多 slice<br/>先補資料再跑匯出"]
+```
+
+### 8.3 若你「確定」要把 slice=10 納入 DGCN3 / Centrality（完整清單）
+
+> 這不是「加一個檔案」而已；你必須確保 **raw / sir / centrality / 下游參數**整套一致，且不混用不同來源的切片邊列表。
+
+#### Step 0：先決定 slice=10 的 raw 邊列表來源（避免混用）
+
+目前你同時有兩套邊列表來源：
+
+- **DGCN3 來源**：`demo/DGCN3/datasets/raw_data/tiage/tiage_*.txt`
+- **tiage-1 來源**：`demo/tiage-1/tiage_slices_txt/tiage_*.txt`（由 `demo/tiage-1/main.py` 生成）
+
+兩者即使同名（例如 `tiage_0.txt`），內容規模也可能不同（邊數差異很大），因此**不建議只把 `tiage_10.txt` 從 tiage-1 來源「單獨拷貝」到 DGCN3 來源**。  
+推薦做法是：**選定一個生成邏輯，並用同一邏輯把 0~10 全部切片都生成出來**，再放到 `demo/DGCN3/datasets/raw_data/tiage/`。
+
+#### Step 1：補齊 DGCN3 raw_data 的 slice=10
+
+- 需要存在：`demo/DGCN3/datasets/raw_data/tiage/tiage_10.txt`
+
+#### Step 2：補齊 SIR 標籤（所有 α）
+
+對每個要測試的 α，都需要存在：
+
+- `demo/DGCN3/sir_results/tiage/tiage_10_a[α].csv`
+
+（目前 `demo/DGCN3/sir_results/tiage/` 未出現任何 `tiage_10_a[*].csv`，因此 **現況下無法把 slice=10 納入 DGCN3 資料載入與中心性匯出**。）
+
+#### Step 3：重新匯出中心性（所有 α）
+
+對每個 α，應產生：
+
+- `demo/DGCN3/Centrality/alpha_<α>/tiage_10.csv`
+
+#### Step 4：同步下游切片數（或改為自動偵測）
+
+目前下游預設切片數寫死為 `10`：
+
+- `knowSelect/TAKE/CentralityLoader.py`：`num_slices: int = 10`
+- `knowSelect/TAKE/Run.py`：建 loader 時預設 `num_slices=10`
+
+若擴充為 0~10（共 11 個切片），你需要：
+
+- 把 `num_slices` 調整為 `11`，或
+- **更推薦**：改成「由 `demo/DGCN3/datasets/raw_data/<dataset>/` 自動掃描出切片集合」再迴圈載入（避免之後再遇到 10/11/… 不一致）
 
