@@ -34,8 +34,24 @@ class CentralityCommunityLoader:
         self.centrality_dict: Dict[int, float] = {}
         self.community_dict: Dict[int, int] = {}
         self.feature_dict: Dict[int, np.ndarray] = {}
+        self.turn_id_dict: Dict[int, int] = {}
 
         self._load_all_features()
+
+    def _build_turn_id_dict(self) -> Dict[int, int]:
+        turn_id_dict: Dict[int, int] = {}
+        if self.node_df.empty:
+            return turn_id_dict
+        if "node_id" not in self.node_df.columns or "turn_id" not in self.node_df.columns:
+            return turn_id_dict
+        for _, row in self.node_df[["node_id", "turn_id"]].iterrows():
+            try:
+                nid = int(row["node_id"])
+                tid = int(row["turn_id"])
+                turn_id_dict[nid] = tid
+            except Exception:
+                continue
+        return turn_id_dict
 
     def _load_centrality_for_slice(self, slice_id: int) -> Dict[int, float]:
         centrality = {}
@@ -141,6 +157,7 @@ class CentralityCommunityLoader:
             self.centrality_dict.update(self._load_centrality_for_slice(slice_id))
             self.community_dict.update(self._load_community_for_slice(slice_id))
         self.feature_dict = self._build_feature_dict()
+        self.turn_id_dict = self._build_turn_id_dict()
 
     def get_num_communities(self) -> int:
         if not self.community_dict:
@@ -164,3 +181,6 @@ class CentralityCommunityLoader:
 
     def get_imp_raw(self, node_id: int) -> float:
         return float(self.centrality_dict.get(node_id, 0.0))
+
+    def get_turn_id(self, node_id: int) -> int:
+        return int(self.turn_id_dict.get(node_id, -1))

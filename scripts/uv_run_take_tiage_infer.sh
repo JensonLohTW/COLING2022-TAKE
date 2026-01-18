@@ -1,25 +1,20 @@
 #!/usr/bin/env bash
-# 以 6 維結構特徵推論 tiage（含中心性）
-# 會輸出 shift precision/recall/F1 與 shift_top3.jsonl
+# 使用 uv 推論 tiage 的 TAKE（knowSelect，test = slice >= 8）
 set -e
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
-VENV_PYTHON="${PROJECT_ROOT}/.venv/bin/python"
-if [ ! -f "$VENV_PYTHON" ]; then
-  echo "錯誤：找不到虛擬環境 Python：$VENV_PYTHON"
+if ! command -v uv >/dev/null 2>&1; then
+  echo "錯誤：找不到 uv。請先執行：bash scripts/uv_setup.sh"
   exit 1
 fi
 
-#
-# IMPORTANT:
 # 若 tiage.split 更新，需刪除舊 test_TAKE.pkl 讓其重新建構測試集 episodes。
-#
 DATA_DIR="knowSelect/datasets/tiage"
 rm -f "${DATA_DIR}/test_TAKE.pkl"
 
-$VENV_PYTHON main.py infer-take \
+uv run python main.py infer-take \
   --dataset tiage \
   --name TAKE_tiage_all_feats \
   --use-centrality \
@@ -27,3 +22,4 @@ $VENV_PYTHON main.py infer-take \
   --centrality-feature-set all \
   --centrality-window 2 \
   --node-id-json datasets/tiage/node_id.json
+

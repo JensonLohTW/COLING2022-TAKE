@@ -107,6 +107,38 @@ def cmd_pipeline(args):
     cmd_infer_take(args)
 
 
+def cmd_generate_shift_answers(args):
+    # 以 knowSelect 推論輸出的 metrics/shift_top3.jsonl 生成每個 shift 事件的 GPT-2 回答文字檔
+    # 注意：knowSelect/TAKE 不是 Python package；這裡用 sys.path 動態加入後再 import
+    knowselect_dir = os.path.join(os.path.dirname(__file__), "knowSelect")
+    if knowselect_dir not in sys.path:
+        sys.path.insert(0, knowselect_dir)
+    from TAKE.ShiftAnswerGenerator import GeneratorConfig, generate_shift_answers_txt  # type: ignore
+
+    base_output = args.base_output_path or "output/"
+    run_dir = os.path.join(os.path.dirname(__file__), "knowSelect", base_output, args.name)
+    metrics_dir = os.path.join(run_dir, "metrics")
+    shift_top3_jsonl = os.path.join(metrics_dir, "shift_top3.jsonl")
+    out_txt = os.path.join(metrics_dir, f"shift_answers_{args.split}_{args.epoch}.txt")
+
+    cfg = GeneratorConfig(
+        model_name_or_path=args.gpt2_model,
+        max_new_tokens=args.max_new_tokens,
+        temperature=args.temperature,
+        top_p=args.top_p,
+        do_sample=not args.greedy,
+    )
+
+    generate_shift_answers_txt(
+        shift_top3_jsonl=shift_top3_jsonl,
+        out_txt=out_txt,
+        cfg=cfg,
+        only_split=args.split,
+        only_epoch=str(args.epoch),
+    )
+    print(f"[*] Saved shift answers to {out_txt}")
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -137,6 +169,17 @@ def main():
     pipeline_parser.add_argument("--model-path", type=str, default="")
     pipeline_parser.add_argument("--output-dir", type=str, default="")
     pipeline_parser.set_defaults(func=cmd_pipeline)
+
+    gen_shift_parser = subparsers.add_parser("generate-shift-answers")
+    _add_common_take_args(gen_shift_parser)
+    gen_shift_parser.add_argument("--split", type=str, default="test", help="對應 knowSelect 推論輸出 record_out 的 dataset 欄位（實際為 split，例如 test）")
+    gen_shift_parser.add_argument("--epoch", type=str, default="all", help="對應 knowSelect 推論輸出 record_out 的 epoch（字串）；all 表示不過濾")
+    gen_shift_parser.add_argument("--gpt2-model", type=str, default="gpt2", help="GPT-2 模型名稱或本地路徑（transformers 可讀）")
+    gen_shift_parser.add_argument("--max-new-tokens", type=int, default=80)
+    gen_shift_parser.add_argument("--temperature", type=float, default=0.7)
+    gen_shift_parser.add_argument("--top-p", type=float, default=0.9)
+    gen_shift_parser.add_argument("--greedy", action="store_true", help="不採樣（greedy decoding）")
+    gen_shift_parser.set_defaults(func=cmd_generate_shift_answers)
 
     args = parser.parse_args()
     args.func(args)

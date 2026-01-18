@@ -275,6 +275,7 @@ class CumulativeTrainer(object):
             accumulative_ID_label = []
             accumulative_episode_mask = []
             shift_top3_records = []
+            shift_pred_records = []
             episode_offset = 0
 
             for k, data in enumerate(test_loader, 0):
@@ -312,33 +313,147 @@ class CumulativeTrainer(object):
                     if episode_index >= len(dataset.episodes):
                         continue
                     episode_examples = dataset.episodes[episode_index]
+                    dialog_id = episode_examples[0]['query_id'].rsplit("_", 1)[0] if episode_examples else f"episode_{episode_index}"
+
+                    # 6.3：逐句 shift 0/1 預測標籤（含 turn_id 以便回溯到 tiage_anno_nodes_all.csv）
+                    for t in range(max_episode_length):
+                        if not mask_batch[b][t]:
+                            continue
+                        if t >= len(episode_examples):
+                            continue
+                        ex = episode_examples[t]
+                        query_id = ex.get("query_id", "")
+                        node_id = int(node_ids_batch[b][t])
+                        pred_shift = int(id_pred_batch[b][t])
+
+                        turn_id = -1
+                        if centrality_loader is not None and node_id != -1 and hasattr(centrality_loader, "get_turn_id"):
+                            try:
+                                turn_id = int(centrality_loader.get_turn_id(node_id))
+                            except Exception:
+                                turn_id = -1
+                        if turn_id == -1:
+                            # fallback：episode 內的 index
+                            turn_id = t
+
+                        shift_pred_records.append({
+                            "dialog_id": dialog_id,
+                            "query_id": query_id,
+                            "turn_id": turn_id,
+                            "node_id": node_id,
+                            "pred_shift": pred_shift
+                        })
                     shift_indices = [
                         t for t in range(max_episode_length)
                         if mask_batch[b][t] and id_pred_batch[b][t] == 1
                     ]
                     shift_found = len(shift_indices) > 0
-                    shift_candidates = []
-                    for t in shift_indices:
-                        if t >= len(episode_examples):
+                    # 6.1 / 6.2：以「區間 Top-3」定義輸出，並加入 turn_id 供回溯
+                    shift_events = []
+                    prev_shift_t = -1
+                    # 區間規則（固定一條可執行規則避免重疊）：
+                    # - 第一次 shift：區間 [0, cur_t]（包含本次 shift）
+                    # - 後續 shift：區間 [prev_shift_t + 1, cur_t]（不含前一次 shift，包含本次 shift）
+                    for cur_t in shift_indices:
+                        if cur_t >= len(episode_examples):
                             continue
-                        query_id = episode_examples[t]['query_id']
-                        tokens = dataset.query.get(query_id, [])
-                        sentence = self.detokenizer(tokens)
-                        node_id = int(node_ids_batch[b][t])
-                        centrality = 0.0
+                        interval_start = 0 if prev_shift_t < 0 else (prev_shift_t + 1)
+                        interval_end = cur_t
+
+                        # shift 句子資訊
+                        cur_ex = episode_examples[cur_t]
+                        cur_query_id = cur_ex.get("query_id", "")
+                        cur_node_id = int(node_ids_batch[b][cur_t])
+
+                        cur_turn_id = -1
+                        if centrality_loader is not None and cur_node_id != -1 and hasattr(centrality_loader, "get_turn_id"):
+                            try:
+                                cur_turn_id = int(centrality_loader.get_turn_id(cur_node_id))
+                            except Exception:
+                                cur_turn_id = -1
+                        if cur_turn_id == -1:
+                            cur_turn_id = cur_t
+
+                        cur_tokens = dataset.query.get(cur_query_id, [])
+                        cur_sentence = self.detokenizer(cur_tokens)
+                        cur_centrality = 0.0
                         if centrality_loader is not None:
-                            centrality = centrality_loader.get_imp_raw(node_id)
-                        shift_candidates.append({
-                            "node_id": node_id,
-                            "sentence": sentence,
-                            "centrality": centrality
+                            cur_centrality = centrality_loader.get_imp_raw(cur_node_id)
+
+                        # 區間內 Top-3（依中心性排序）
+                        interval_candidates = []
+                        for t in range(interval_start, interval_end + 1):
+                            if t >= len(episode_examples):
+                                continue
+                            ex = episode_examples[t]
+                            qid = ex.get("query_id", "")
+                            nid = int(node_ids_batch[b][t])
+
+                            tid = -1
+                            if centrality_loader is not None and nid != -1 and hasattr(centrality_loader, "get_turn_id"):
+                                try:
+                                    tid = int(centrality_loader.get_turn_id(nid))
+                                except Exception:
+                                    tid = -1
+                            if tid == -1:
+                                tid = t
+
+                            toks = dataset.query.get(qid, [])
+                            sent = self.detokenizer(toks)
+                            cent = 0.0
+                            if centrality_loader is not None:
+                                cent = centrality_loader.get_imp_raw(nid)
+
+                            interval_candidates.append({
+                                "node_id": nid,
+                                "query_id": qid,
+                                "turn_id": tid,
+                                "sentence": sent,
+                                "centrality": cent
+                            })
+                        interval_candidates.sort(key=lambda x: x["centrality"], reverse=True)
+
+                        interval_start_turn_id = -1
+                        interval_end_turn_id = -1
+                        if interval_candidates:
+                            # 由於 interval_start/interval_end 是 episode 內 index，這裡改用對應句子的 turn_id（CSV 對照）做邊界輸出
+                            # 注意：區間規則固定為「包含本次 shift，不包含前一次 shift」
+                            start_node_id = int(node_ids_batch[b][interval_start]) if interval_start < len(node_ids_batch[b]) else -1
+                            end_node_id = cur_node_id
+                            if centrality_loader is not None and hasattr(centrality_loader, "get_turn_id"):
+                                try:
+                                    interval_start_turn_id = int(centrality_loader.get_turn_id(start_node_id)) if start_node_id != -1 else interval_start
+                                except Exception:
+                                    interval_start_turn_id = interval_start
+                                try:
+                                    interval_end_turn_id = int(centrality_loader.get_turn_id(end_node_id)) if end_node_id != -1 else interval_end
+                                except Exception:
+                                    interval_end_turn_id = interval_end
+                            else:
+                                interval_start_turn_id = interval_start
+                                interval_end_turn_id = interval_end
+
+                        shift_events.append({
+                            "shift_query_id": cur_query_id,
+                            "shift_turn_id": cur_turn_id,
+                            "shift_node_id": cur_node_id,
+                            "shift_sentence": cur_sentence,
+                            "shift_centrality": cur_centrality,
+                            "interval_start_turn": interval_start,
+                            "interval_end_turn": interval_end,
+                            "interval_start_turn_id": interval_start_turn_id,
+                            "interval_end_turn_id": interval_end_turn_id,
+                            "interval_top3": interval_candidates[:3]
                         })
-                    shift_candidates.sort(key=lambda x: x["centrality"], reverse=True)
-                    dialog_id = episode_examples[0]['query_id'].rsplit("_", 1)[0]
+
+                        prev_shift_t = cur_t
                     shift_top3_records.append({
                         "dialog_id": dialog_id,
                         "shift_found": shift_found,
-                        "shift_top3": shift_candidates[:3]
+                        # 保持欄位相容：仍提供 shift_top3，但改為「第一次 shift 事件」的區間 Top-3
+                        "shift_top3": (shift_events[0]["interval_top3"] if shift_events else []),
+                        # 新增：完整 shift 事件清單（建議消費此欄位）
+                        "shift_events": shift_events
                     })
 
                 episode_offset += batch_size
@@ -374,14 +489,14 @@ class CumulativeTrainer(object):
             }
 
 
-        return output_path, dataset.answer_file, {"ks_acc": rounder(100*(accumulative_final_ks_acc), 2)}, {"shift_ks_acc": rounder(100*(accumulative_shift_ks_acc), 2)}, {"inherit_ks_acc": rounder(100*(accumulative_inherit_ks_acc), 2)}, {"ID_acc": rounder(100*(accumulative_ID_acc), 2)}, shift_prf, shift_top3_records
+        return output_path, dataset.answer_file, {"ks_acc": rounder(100*(accumulative_final_ks_acc), 2)}, {"shift_ks_acc": rounder(100*(accumulative_shift_ks_acc), 2)}, {"inherit_ks_acc": rounder(100*(accumulative_inherit_ks_acc), 2)}, {"ID_acc": rounder(100*(accumulative_ID_acc), 2)}, shift_prf, shift_top3_records, shift_pred_records
 
 
     def test(self, method, dataset, collate_fn, batch_size, dataset_name, epoch, output_path):
         #  disables tracking of gradients in autograd.
         # In this mode, the result of every computation will have requires_grad=False, even when the inputs have requires_grad=True.
         with torch.no_grad():
-            run_file, answer_file, final_ks_acc, shift_ks_acc, inherit_ks_acc, ID_acc, shift_prf, shift_top3_records = self.predict(
+            run_file, answer_file, final_ks_acc, shift_ks_acc, inherit_ks_acc, ID_acc, shift_prf, shift_top3_records, shift_pred_records = self.predict(
                 method, dataset, collate_fn, batch_size, dataset_name+"_"+epoch, output_path
             )
 
@@ -430,6 +545,13 @@ class CumulativeTrainer(object):
         shift_top3_path = os.path.join(metrics_dir, "shift_top3.jsonl")
         with open(shift_top3_path, 'a', encoding='utf-8') as w:
             for record in shift_top3_records:
+                record_out = {"run": self.name, "dataset": dataset_name, "epoch": epoch, **record}
+                w.write(json.dumps(record_out, ensure_ascii=False) + "\n")
+
+        # 6.3：逐句 shift 預測標籤（0/1）
+        shift_pred_path = os.path.join(metrics_dir, "shift_pred.jsonl")
+        with open(shift_pred_path, 'a', encoding='utf-8') as w:
+            for record in shift_pred_records:
                 record_out = {"run": self.name, "dataset": dataset_name, "epoch": epoch, **record}
                 w.write(json.dumps(record_out, ensure_ascii=False) + "\n")
 
