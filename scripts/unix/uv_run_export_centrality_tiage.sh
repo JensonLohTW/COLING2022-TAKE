@@ -10,5 +10,36 @@ if ! command -v uv >/dev/null 2>&1; then
   exit 1
 fi
 
-uv run python main.py export-centrality --dataset-name tiage --alphas 1.5
+LOG_FILE=""
+if [ "${ORCHESTRATED:-0}" != "1" ]; then
+  if [ -z "${RUN_ID:-}" ]; then
+    RUN_ID="$(date '+%Y-%m-%d_%H-%M-%S')"
+  fi
+  if [ -z "${RUN_LOG_DIR:-}" ]; then
+    RUN_LOG_DIR="${PROJECT_ROOT}/logs/${RUN_ID}"
+  fi
+  if [ -z "${RUN_OUTPUT_DIR:-}" ]; then
+    RUN_OUTPUT_DIR="${PROJECT_ROOT}/outputs/${RUN_ID}"
+  fi
+  mkdir -p "$RUN_LOG_DIR" "$RUN_OUTPUT_DIR"
+  export RUN_ID RUN_LOG_DIR RUN_OUTPUT_DIR
+  LOG_FILE="${RUN_LOG_DIR}/02_export_centrality.log"
+fi
+
+OUT_DIR="${PROJECT_ROOT}/demo/DGCN3/Centrality"
+if [ -n "${RUN_OUTPUT_DIR:-}" ]; then
+  OUT_DIR="${RUN_OUTPUT_DIR}/dgcn3/Centrality"
+fi
+
+mkdir -p "$OUT_DIR"
+if [ -n "$LOG_FILE" ]; then
+  uv run python main.py export-centrality --dataset-name tiage --alphas 1.5 --output-dir "$OUT_DIR" 2>&1 | tee -a "$LOG_FILE"
+else
+  uv run python main.py export-centrality --dataset-name tiage --alphas 1.5 --output-dir "$OUT_DIR"
+fi
+
+if [ -n "$LOG_FILE" ]; then
+  echo "[OK] logs:    ${RUN_LOG_DIR}"
+  echo "[OK] outputs: ${RUN_OUTPUT_DIR}"
+fi
 

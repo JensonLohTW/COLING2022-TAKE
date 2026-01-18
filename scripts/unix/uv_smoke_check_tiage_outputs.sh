@@ -10,8 +10,26 @@ if ! command -v uv >/dev/null 2>&1; then
   exit 1
 fi
 
+if [ "${ORCHESTRATED:-0}" != "1" ]; then
+  if [ -z "${RUN_ID:-}" ]; then
+    RUN_ID="$(date '+%Y-%m-%d_%H-%M-%S')"
+  fi
+  if [ -z "${RUN_LOG_DIR:-}" ]; then
+    RUN_LOG_DIR="${PROJECT_ROOT}/logs/${RUN_ID}"
+  fi
+  mkdir -p "$RUN_LOG_DIR"
+  export RUN_ID RUN_LOG_DIR
+  LOG_FILE="${RUN_LOG_DIR}/06_smoke_check.log"
+  exec > >(tee -a "$LOG_FILE") 2>&1
+fi
+
 NAME="TAKE_tiage_all_feats"
-METRICS_DIR="${PROJECT_ROOT}/knowSelect/output/${NAME}/metrics"
+BASE_OUTPUT_DIR="${PROJECT_ROOT}/knowSelect/output"
+if [ -n "${RUN_OUTPUT_DIR:-}" ]; then
+  BASE_OUTPUT_DIR="${RUN_OUTPUT_DIR}/knowSelect/output"
+fi
+export BASE_OUTPUT_DIR
+METRICS_DIR="${BASE_OUTPUT_DIR}/${NAME}/metrics"
 
 echo "[*] 檢查輸出目錄：${METRICS_DIR}"
 test -d "$METRICS_DIR"
@@ -26,7 +44,8 @@ test -f "${METRICS_DIR}/shift_pred.jsonl"
 echo "[*] 檢查 shift_pred.jsonl 欄位（dialog_id/query_id/turn_id/node_id/pred_shift）"
 uv run python - << 'PY'
 import json, os
-path = os.path.join("knowSelect","output","TAKE_tiage_all_feats","metrics","shift_pred.jsonl")
+base = os.environ.get("BASE_OUTPUT_DIR") or os.path.join("knowSelect","output")
+path = os.path.join(base, "TAKE_tiage_all_feats", "metrics", "shift_pred.jsonl")
 need = {"dialog_id","query_id","turn_id","node_id","pred_shift"}
 with open(path, "r", encoding="utf-8") as f:
     for i, line in enumerate(f):
@@ -46,7 +65,8 @@ PY
 echo "[*] 檢查 shift_top3.jsonl 是否包含 shift_events 與 interval_top3.turn_id"
 uv run python - << 'PY'
 import json, os
-path = os.path.join("knowSelect","output","TAKE_tiage_all_feats","metrics","shift_top3.jsonl")
+base = os.environ.get("BASE_OUTPUT_DIR") or os.path.join("knowSelect","output")
+path = os.path.join(base, "TAKE_tiage_all_feats", "metrics", "shift_top3.jsonl")
 with open(path, "r", encoding="utf-8") as f:
     for i, line in enumerate(f):
         line=line.strip()
