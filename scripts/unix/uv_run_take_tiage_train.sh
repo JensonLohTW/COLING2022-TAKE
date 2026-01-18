@@ -1,22 +1,16 @@
 #!/usr/bin/env bash
-# 以 6 維結構特徵訓練 tiage 的 TAKE（含中心性）
-# 若已有舊的 *_TAKE.pkl 且缺少 node_id，請先移除再重建
+# 使用 uv 訓練 tiage 的 TAKE（knowSelect，含中心性/社團/6維特徵）
 set -e
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PROJECT_ROOT"
 
-VENV_PYTHON="${PROJECT_ROOT}/.venv/bin/python"
-if [ ! -f "$VENV_PYTHON" ]; then
-  echo "錯誤：找不到虛擬環境 Python：$VENV_PYTHON"
+if ! command -v uv >/dev/null 2>&1; then
+  echo "錯誤：找不到 uv。請先執行：bash scripts/unix/uv_setup.sh"
   exit 1
 fi
 
-#
-# IMPORTANT:
-# knowSelect/TAKE/Run.py 會優先讀取已存在的 *_TAKE.pkl，
 # 若切分規則或 tiage.split 更新，需刪除舊 pkl 讓其重新建構資料。
-#
 DATA_DIR="knowSelect/datasets/tiage"
 rm -f \
   "${DATA_DIR}/train_TAKE.pkl" \
@@ -24,7 +18,7 @@ rm -f \
   "${DATA_DIR}/query_TAKE.pkl" \
   "${DATA_DIR}/passage_TAKE.pkl"
 
-$VENV_PYTHON main.py train-take \
+uv run python main.py train-take \
   --dataset tiage \
   --name TAKE_tiage_all_feats \
   --use-centrality \
@@ -32,3 +26,4 @@ $VENV_PYTHON main.py train-take \
   --centrality-feature-set all \
   --centrality-window 2 \
   --node-id-json datasets/tiage/node_id.json
+

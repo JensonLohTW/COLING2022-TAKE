@@ -1,29 +1,31 @@
-#!/usr/bin/env bash
-# 使用 uv 執行 Tiage 輸出 Smoke Check（不跑訓練，只檢查輸出是否齊全、欄位是否存在）
-set -e
+<#
+使用 uv 執行 Tiage 輸出 Smoke Check（不跑訓練，只檢查輸出是否齊全、欄位是否存在）
+#>
+$ErrorActionPreference = "Stop"
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$PROJECT_ROOT"
+$projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+Set-Location $projectRoot
 
-if ! command -v uv >/dev/null 2>&1; then
-  echo "錯誤：找不到 uv。請先執行：bash scripts/uv_setup.sh"
-  exit 1
-fi
+if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
+  Write-Error "找不到 uv。請先執行 scripts/windows/uv_setup.ps1"
+}
 
-NAME="TAKE_tiage_all_feats"
-METRICS_DIR="${PROJECT_ROOT}/knowSelect/output/${NAME}/metrics"
+$name = "TAKE_tiage_all_feats"
+$metricsDir = Join-Path $projectRoot "knowSelect\output\$name\metrics"
+$splitPath = Join-Path $projectRoot "knowSelect\datasets\tiage\tiage.split"
 
-echo "[*] 檢查輸出目錄：${METRICS_DIR}"
-test -d "$METRICS_DIR"
+Write-Host "[*] 檢查輸出目錄：$metricsDir"
+if (-not (Test-Path $metricsDir)) { throw "找不到 metrics 目錄：$metricsDir" }
 
-echo "[*] 檢查 tiage.split 是否存在且包含 train/test"
-test -f "${PROJECT_ROOT}/knowSelect/datasets/tiage/tiage.split"
+Write-Host "[*] 檢查 tiage.split 是否存在"
+if (-not (Test-Path $splitPath)) { throw "找不到 split：$splitPath" }
 
-test -f "${METRICS_DIR}/shift_metrics.json"
-test -f "${METRICS_DIR}/shift_top3.jsonl"
-test -f "${METRICS_DIR}/shift_pred.jsonl"
+foreach ($f in @("shift_metrics.json","shift_top3.jsonl","shift_pred.jsonl")) {
+  $p = Join-Path $metricsDir $f
+  if (-not (Test-Path $p)) { throw "缺少輸出檔：$p" }
+}
 
-echo "[*] 檢查 shift_pred.jsonl 欄位（dialog_id/query_id/turn_id/node_id/pred_shift）"
+Write-Host "[*] 檢查 shift_pred.jsonl 欄位"
 uv run python - << 'PY'
 import json, os
 path = os.path.join("knowSelect","output","TAKE_tiage_all_feats","metrics","shift_pred.jsonl")
@@ -43,7 +45,7 @@ with open(path, "r", encoding="utf-8") as f:
 print("[OK] shift_pred.jsonl 欄位與取值正常（抽樣第一筆）")
 PY
 
-echo "[*] 檢查 shift_top3.jsonl 是否包含 shift_events 與 interval_top3.turn_id"
+Write-Host "[*] 檢查 shift_top3.jsonl 結構"
 uv run python - << 'PY'
 import json, os
 path = os.path.join("knowSelect","output","TAKE_tiage_all_feats","metrics","shift_top3.jsonl")
@@ -63,5 +65,5 @@ with open(path, "r", encoding="utf-8") as f:
 print("[OK] shift_top3.jsonl 結構正常（抽樣第一筆）")
 PY
 
-echo "[OK] Smoke check 完成"
+Write-Host "[OK] Smoke check 完成"
 

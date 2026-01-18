@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# Tiage 流程輸出 Smoke Check（不跑訓練，只檢查輸出是否齊全、格式是否包含必要欄位）
+# 使用 uv 執行 Tiage 輸出 Smoke Check（不跑訓練，只檢查輸出是否齊全、欄位是否存在）
 set -e
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PROJECT_ROOT"
 
-VENV_PYTHON="${PROJECT_ROOT}/.venv/bin/python"
-if [ ! -f "$VENV_PYTHON" ]; then
-  echo "錯誤：找不到虛擬環境 Python：$VENV_PYTHON"
+if ! command -v uv >/dev/null 2>&1; then
+  echo "錯誤：找不到 uv。請先執行：bash scripts/unix/uv_setup.sh"
   exit 1
 fi
 
@@ -25,8 +24,8 @@ test -f "${METRICS_DIR}/shift_top3.jsonl"
 test -f "${METRICS_DIR}/shift_pred.jsonl"
 
 echo "[*] 檢查 shift_pred.jsonl 欄位（dialog_id/query_id/turn_id/node_id/pred_shift）"
-$VENV_PYTHON - << 'PY'
-import json, os, sys
+uv run python - << 'PY'
+import json, os
 path = os.path.join("knowSelect","output","TAKE_tiage_all_feats","metrics","shift_pred.jsonl")
 need = {"dialog_id","query_id","turn_id","node_id","pred_shift"}
 with open(path, "r", encoding="utf-8") as f:
@@ -45,7 +44,7 @@ print("[OK] shift_pred.jsonl 欄位與取值正常（抽樣第一筆）")
 PY
 
 echo "[*] 檢查 shift_top3.jsonl 是否包含 shift_events 與 interval_top3.turn_id"
-$VENV_PYTHON - << 'PY'
+uv run python - << 'PY'
 import json, os
 path = os.path.join("knowSelect","output","TAKE_tiage_all_feats","metrics","shift_top3.jsonl")
 with open(path, "r", encoding="utf-8") as f:
@@ -58,9 +57,8 @@ with open(path, "r", encoding="utf-8") as f:
         if events:
             ev=events[0]
             top3=ev.get("interval_top3") or []
-            if top3:
-                if "turn_id" not in top3[0]:
-                    raise SystemExit("interval_top3 缺少 turn_id")
+            if top3 and "turn_id" not in top3[0]:
+                raise SystemExit("interval_top3 缺少 turn_id")
         break
 print("[OK] shift_top3.jsonl 結構正常（抽樣第一筆）")
 PY

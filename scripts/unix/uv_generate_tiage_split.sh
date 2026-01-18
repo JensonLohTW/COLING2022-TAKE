@@ -2,11 +2,11 @@
 # 依 dialog_id（數值排序）每 50 dialogs 分箱產生 tiage.split（TAKE：train=0..7，test>=8）
 set -e
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PROJECT_ROOT"
 
 if ! command -v uv >/dev/null 2>&1; then
-  echo "錯誤：找不到 uv。請先執行：bash scripts/uv_setup.sh"
+  echo "錯誤：找不到 uv。請先執行：bash scripts/unix/uv_setup.sh"
   exit 1
 fi
 

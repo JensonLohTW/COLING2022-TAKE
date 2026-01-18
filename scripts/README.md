@@ -1,43 +1,92 @@
-# Scripts 說明
+# Scripts（本次整理後）
 
-此資料夾集中管理 tiage 相關的啟動腳本。請在專案根目錄執行這些腳本。
+> 本目錄已依你的要求整理：
+> - Unix/macOS 腳本集中在 `scripts/unix/`
+> - Windows 腳本集中在 `scripts/windows/`
+> - 僅保留本次新增的「Tiage 時間片切分 + uv 完整訓練/測試」流程
 
-## 先決條件
+---
 
-- 需先完成 DGCN3 模型訓練，並產生：
-  - `demo/DGCN3/model_registry/node_importance_tiage.pkl`
-- `datasets/tiage/node_id.json` 必須存在
-- 若已有舊的 `*_TAKE.pkl` 且缺少 `node_id`，請先移除再重建
+## 0. 完整流程（Tiage｜uv 版）
 
-## 腳本列表
+### 一鍵執行（推薦）
 
-- `run_export_centrality_tiage.sh`
-  - 匯出 0~9 時間片中心性預測到 `demo/DGCN3/Centrality/alpha_1.5/`
-- `run_take_tiage_train.sh`
-  - 使用 6 維結構特徵訓練 tiage
-- `run_take_tiage_infer.sh`
-  - 推論並輸出 shift 指標與 top3
-- `run_take_tiage_ablation.sh`
-  - 依序跑三組消融設定，輸出 `ablation_results.csv`
-- `run_tiage_pipeline.sh`
-  - 一鍵流程（匯出中心性 → 訓練 → 推論）
-
-## 範例
+#### macOS / Linux
 
 ```bash
-bash scripts/run_export_centrality_tiage.sh
-bash scripts/run_take_tiage_train.sh
-bash scripts/run_take_tiage_infer.sh
+bash scripts/unix/uv_run_tiage_train_test.sh
 ```
 
-消融實驗：
+#### Windows（PowerShell）
 
-```bash
-bash scripts/run_take_tiage_ablation.sh
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\windows\uv_run_tiage_train_test.ps1
 ```
 
-一鍵流程：
+---
 
-```bash
-bash scripts/run_tiage_pipeline.sh
+## 1. 流程總覽（Mermaid）
+
+```mermaid
+flowchart TD
+  A[uv sync] --> B[生成 tiage.split<br/>每 50 dialogs 一片]
+  B --> C[DGCN3 匯出中心性<br/>對所有 slices]
+  C --> D[TAKE 訓練（train）<br/>slice 0..7]
+  D --> E[TAKE 測試推論（test）<br/>slice >=8]
+  E --> F[GPT-2 生成 shift 事件回答]
+  F --> G[Smoke Check]
 ```
+
+---
+
+## 2. 逐步腳本（每一步的意義）
+
+> Tiage 時間片/切分規則（已定案）：
+> - dialogs 依 `dialog_id` **數值排序**
+> - 每 50 dialogs = 1 slice（允許最後一片 <50；允許 slices >10）
+> - TAKE：Train = slice 0–7；Test = slice ≥8
+> - DGCN3：不切分，對所有 slices 匯出中心性
+
+### Step 0：同步環境（uv）
+
+- **意義**：依 `uv.lock` 固定版本同步依賴，確保可重現。
+- **Unix**：`bash scripts/unix/uv_setup.sh`
+- **Windows**：`powershell -ExecutionPolicy Bypass -File scripts\windows\uv_setup.ps1`
+
+### Step 1：生成 `tiage.split`
+
+- **意義**：讓 TAKE（knowSelect）依時間片切分 train/test。
+- **Unix**：`bash scripts/unix/uv_generate_tiage_split.sh`
+- **Windows**：`powershell -ExecutionPolicy Bypass -File scripts\windows\uv_generate_tiage_split.ps1`
+- **輸出**：`knowSelect/datasets/tiage/tiage.split`
+
+### Step 2：DGCN3 匯出中心性（所有 slices）
+
+- **意義**：產生每個 slice 的中心性預測 CSV，供 TAKE 融合使用。
+- **Unix**：`bash scripts/unix/uv_run_export_centrality_tiage.sh`
+- **Windows**：`powershell -ExecutionPolicy Bypass -File scripts\windows\uv_run_export_centrality_tiage.ps1`
+- **輸出**：`demo/DGCN3/Centrality/alpha_1.5/tiage_<slice>.csv`
+
+### Step 3：TAKE 訓練（train）
+
+- **意義**：用 train split（slice 0–7）訓練模型。腳本會清理舊的 `*_TAKE.pkl` 以確保切分生效。
+- **Unix**：`bash scripts/unix/uv_run_take_tiage_train.sh`
+- **Windows**：`powershell -ExecutionPolicy Bypass -File scripts\windows\uv_run_take_tiage_train.ps1`
+
+### Step 4：TAKE 測試推論（test）
+
+- **意義**：對 test split（slice ≥8）推論並落檔（shift_pred/shift_top3/shift_metrics）。
+- **Unix**：`bash scripts/unix/uv_run_take_tiage_infer.sh`
+- **Windows**：`powershell -ExecutionPolicy Bypass -File scripts\windows\uv_run_take_tiage_infer.ps1`
+
+### Step 5：GPT-2 生成 shift 事件回答（文字檔）
+
+- **意義**：讀取 `shift_top3.jsonl` 的 shift_events，對每個 shift 事件生成回答並寫入文字檔。
+- **Unix**：`bash scripts/unix/uv_run_generate_shift_answers_tiage.sh`
+- **Windows**：`powershell -ExecutionPolicy Bypass -File scripts\windows\uv_run_generate_shift_answers_tiage.ps1`
+
+### Step 6：Smoke Check（輸出驗證）
+
+- **意義**：檢查輸出檔是否存在、欄位是否齊全、取值是否合理（不跑訓練）。
+- **Unix**：`bash scripts/unix/uv_smoke_check_tiage_outputs.sh`
+- **Windows**：`powershell -ExecutionPolicy Bypass -File scripts\windows\uv_smoke_check_tiage_outputs.ps1`

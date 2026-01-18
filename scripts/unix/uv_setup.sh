@@ -2,7 +2,7 @@
 # 使用 uv 建立/同步環境（依 uv.lock 固定版本）
 set -e
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PROJECT_ROOT"
 
 if ! command -v uv >/dev/null 2>&1; then
@@ -10,8 +10,6 @@ if ! command -v uv >/dev/null 2>&1; then
   exit 1
 fi
 
-# 依鎖檔同步依賴；若你希望允許解鎖更新，可改用 `uv sync`
 uv sync --frozen
-
 echo "[OK] uv 環境同步完成"
 

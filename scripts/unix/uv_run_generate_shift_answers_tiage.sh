@@ -2,11 +2,11 @@
 # 使用 uv 生成「每個 shift 事件」的 GPT-2 回答文字檔（tiage）
 set -e
 
-PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PROJECT_ROOT"
 
 if ! command -v uv >/dev/null 2>&1; then
-  echo "錯誤：找不到 uv。請先執行：bash scripts/uv_setup.sh"
+  echo "錯誤：找不到 uv。請先執行：bash scripts/unix/uv_setup.sh"
   exit 1
 fi
 
