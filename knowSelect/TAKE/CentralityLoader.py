@@ -171,11 +171,13 @@ class CentralityCommunityLoader:
 
     def get_batch_features(self, node_ids: torch.Tensor, device: torch.device) -> Tuple[torch.Tensor, torch.Tensor]:
         batch_size = node_ids.size(0)
-        features = torch.zeros(batch_size, 6, device=device)
+        features = torch.zeros(batch_size, 6, device=device, dtype=torch.float32)
         communities = torch.zeros(batch_size, dtype=torch.long, device=device)
-        for i, nid in enumerate(node_ids.tolist()):
+        # 使用 .item() 逐个获取避免 .tolist() 的 NumPy 依赖
+        for i in range(batch_size):
+            nid = int(node_ids[i].item())
             feat, comm = self.get_features_for_node(nid)
-            features[i] = torch.tensor(feat, device=device)
+            features[i] = torch.tensor(feat, device=device, dtype=torch.float32)
             communities[i] = comm
         return features, communities
 

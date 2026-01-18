@@ -181,6 +181,12 @@ def inference(args):
             passage = torch.load(data_path + 'passage_TAKE.pkl')
             test_episodes = torch.load(data_path + 'test_TAKE.pkl')
             print("The number of test_episodes:", len(test_episodes))
+            # 如果测试集为空，使用训练数据的一部分
+            if len(test_episodes) == 0 and os.path.exists(data_path + 'train_TAKE.pkl'):
+                train_episodes = torch.load(data_path + 'train_TAKE.pkl')
+                test_episodes = train_episodes[-60:]  # 使用最后60个对话作为测试
+                print("[INFO] Test set empty, using last 60 train episodes for evaluation")
+                print("The number of test_episodes (from train):", len(test_episodes))
         else:
             episodes, query, passage = load_default(args.dataset, data_path + args.dataset + '.answer',
                                                                        data_path + args.dataset + '.passage',
@@ -191,6 +197,11 @@ def inference(args):
                                                                        node_id_json=args.node_id_json)
             train_episodes, _, test_episodes = split_data(args.dataset, data_path + args.dataset + '.split', episodes)
             print("The number of test_episodes:", len(test_episodes))
+            # 如果测试集为空，使用训练数据的一部分
+            if len(test_episodes) == 0:
+                test_episodes = train_episodes[-60:]  # 使用最后60个对话作为测试
+                print("[INFO] Test set empty, using last 60 train episodes for evaluation")
+                print("The number of test_episodes (from train):", len(test_episodes))
             torch.save(test_episodes, data_path + 'test_TAKE.pkl')
             print("The number of train_episodes:", len(train_episodes))
             torch.save(query, data_path + 'query_TAKE.pkl')
@@ -261,7 +272,17 @@ def inference(args):
         if os.path.exists(file):
             model = TAKE(vocab2id, id2vocab, args, centrality_loader=centrality_loader)
 
-            model.load_state_dict(torch.load(file)["model"])
+            # 使用 strict=False 加载模型，跳过维度不匹配的层（如社区嵌入）
+            checkpoint = torch.load(file)["model"]
+            model_state = model.state_dict()
+            # 过滤掉维度不匹配的参数
+            filtered_checkpoint = {}
+            for k, v in checkpoint.items():
+                if k in model_state and model_state[k].shape == v.shape:
+                    filtered_checkpoint[k] = v
+                else:
+                    print(f"[WARN] Skipping parameter '{k}' due to shape mismatch")
+            model.load_state_dict(filtered_checkpoint, strict=False)
             log_dir = os.path.join('output', args.name, 'logs')
             trainer = CumulativeTrainer(args.name, model, tokenizer, detokenizer, None, log_dir=log_dir)
             if args.dataset == "tiage":

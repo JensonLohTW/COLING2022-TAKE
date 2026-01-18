@@ -1,0 +1,77 @@
+[2026-01-18 16:44:08] === Training session started: TAKE_tiage_all_feats ===
+[2026-01-18 16:44:08] Log file: output\TAKE_tiage_all_feats\logs\train_20260118_164408.log
+[2026-01-18 16:44:09] Using CUDA
+[2026-01-18 16:44:12] ============================================================
+[2026-01-18 16:44:12] Starting Epoch 0 | Total batches: 300 | Batch size: 1
+[2026-01-18 16:44:12] ============================================================
+[2026-01-18 16:44:22] [Epoch 0] Batch 1/300 (0.3%) | loss_ks: 1.0464 | loss_distill: 2.6016 | loss_ID: 0.3248 | ks_acc: 0.4000 | ID_acc: 0.0000 | elapsed: 10.0s | LR: 0.00e+00
+[2026-01-18 16:46:01] [Epoch 0] Batch 11/300 (3.7%) | loss_ks: 0.5746 | loss_distill: 2.1224 | loss_ID: 0.3998 | ks_acc: 0.6400 | ID_acc: 0.1400 | elapsed: 108.7s | LR: 0.00e+00
+[2026-01-18 16:48:00] [Epoch 0] Batch 21/300 (7.0%) | loss_ks: 0.4407 | loss_distill: 2.0073 | loss_ID: 0.4935 | ks_acc: 0.7800 | ID_acc: 0.1800 | elapsed: 227.7s | LR: 3.16e-06
+[2026-01-18 16:50:05] [Epoch 0] Batch 31/300 (10.3%) | loss_ks: 0.2213 | loss_distill: 1.8344 | loss_ID: 0.8878 | ks_acc: 0.8600 | ID_acc: 0.2800 | elapsed: 352.1s | LR: 3.16e-06
+[2026-01-18 16:52:16] [Epoch 0] Batch 41/300 (13.7%) | loss_ks: 0.3427 | loss_distill: 2.0726 | loss_ID: 0.2826 | ks_acc: 0.7800 | ID_acc: 0.1000 | elapsed: 484.0s | LR: 6.32e-06
+[2026-01-18 16:54:28] [Epoch 0] Batch 51/300 (17.0%) | loss_ks: 0.1009 | loss_distill: 2.3039 | loss_ID: 0.4028 | ks_acc: 0.9600 | ID_acc: 0.1200 | elapsed: 615.8s | LR: 9.47e-06
+[2026-01-18 16:56:41] [Epoch 0] Batch 61/300 (20.3%) | loss_ks: 0.2141 | loss_distill: 2.1288 | loss_ID: 0.3158 | ks_acc: 0.8600 | ID_acc: 0.1200 | elapsed: 748.6s | LR: 9.47e-06
+[2026-01-18 16:58:53] [Epoch 0] Batch 71/300 (23.7%) | loss_ks: 0.1067 | loss_distill: 2.4593 | loss_ID: 0.4888 | ks_acc: 0.9200 | ID_acc: 0.1800 | elapsed: 880.8s | LR: 1.26e-05
+[2026-01-18 17:01:05] [Epoch 0] Batch 81/300 (27.0%) | loss_ks: 0.2176 | loss_distill: 2.0063 | loss_ID: 0.4866 | ks_acc: 0.8600 | ID_acc: 0.2000 | elapsed: 1012.9s | LR: 1.58e-05
+[2026-01-18 17:03:18] [Epoch 0] Batch 91/300 (30.3%) | loss_ks: 0.6528 | loss_distill: 2.1974 | loss_ID: 0.4071 | ks_acc: 0.6000 | ID_acc: 0.1200 | elapsed: 1145.3s | LR: 1.58e-05
+[2026-01-18 17:05:29] [Epoch 0] Batch 101/300 (33.7%) | loss_ks: 0.5586 | loss_distill: 2.2030 | loss_ID: 0.3823 | ks_acc: 0.6400 | ID_acc: 0.1800 | elapsed: 1277.0s | LR: 1.89e-05
+[2026-01-18 17:07:43] [Epoch 0] Batch 111/300 (37.0%) | loss_ks: 0.2310 | loss_distill: 1.9400 | loss_ID: 0.5635 | ks_acc: 0.8200 | ID_acc: 0.2000 | elapsed: 1410.9s | LR: 1.89e-05
+[2026-01-18 17:09:56] [Epoch 0] Batch 121/300 (40.3%) | loss_ks: 0.3169 | loss_distill: 1.6120 | loss_ID: 0.8403 | ks_acc: 0.8400 | ID_acc: 0.3200 | elapsed: 1543.9s | LR: 2.21e-05
+[2026-01-18 17:12:13] [Epoch 0] Batch 131/300 (43.7%) | loss_ks: 0.3365 | loss_distill: 1.8056 | loss_ID: 0.7662 | ks_acc: 0.8000 | ID_acc: 0.1800 | elapsed: 1680.2s | LR: 2.53e-05
+[2026-01-18 17:14:29] [Epoch 0] Batch 141/300 (47.0%) | loss_ks: 0.2246 | loss_distill: 1.2715 | loss_ID: 0.4432 | ks_acc: 0.8600 | ID_acc: 0.3200 | elapsed: 1816.4s | LR: 2.53e-05
+[2026-01-18 17:16:40] [Epoch 0] Batch 151/300 (50.3%) | loss_ks: 0.4367 | loss_distill: 1.2884 | loss_ID: 0.7268 | ks_acc: 0.7000 | ID_acc: 0.3400 | elapsed: 1947.7s | LR: 2.84e-05
+[2026-01-18 17:18:51] [Epoch 0] Batch 161/300 (53.7%) | loss_ks: 0.5368 | loss_distill: 1.4799 | loss_ID: 0.3958 | ks_acc: 0.7600 | ID_acc: 0.2800 | elapsed: 2079.1s | LR: 3.16e-05
+[2026-01-18 17:21:03] [Epoch 0] Batch 171/300 (57.0%) | loss_ks: 0.5701 | loss_distill: 1.6997 | loss_ID: 0.3981 | ks_acc: 0.6200 | ID_acc: 0.1000 | elapsed: 2210.8s | LR: 3.16e-05
+[2026-01-18 17:23:14] [Epoch 0] Batch 181/300 (60.3%) | loss_ks: 0.3419 | loss_distill: 1.4310 | loss_ID: 0.4779 | ks_acc: 0.7800 | ID_acc: 0.3800 | elapsed: 2342.0s | LR: 3.47e-05
+[2026-01-18 17:25:26] [Epoch 0] Batch 191/300 (63.7%) | loss_ks: 0.4384 | loss_distill: 1.4203 | loss_ID: 0.5324 | ks_acc: 0.7200 | ID_acc: 0.2600 | elapsed: 2473.7s | LR: 3.47e-05
+[2026-01-18 17:27:38] [Epoch 0] Batch 201/300 (67.0%) | loss_ks: 0.3222 | loss_distill: 1.1559 | loss_ID: 0.4002 | ks_acc: 0.8200 | ID_acc: 0.4200 | elapsed: 2605.1s | LR: 3.79e-05
+[2026-01-18 17:29:57] [Epoch 0] Batch 211/300 (70.3%) | loss_ks: 0.6665 | loss_distill: 0.8478 | loss_ID: 0.3952 | ks_acc: 0.6200 | ID_acc: 0.3800 | elapsed: 2744.9s | LR: 4.11e-05
+[2026-01-18 17:32:10] [Epoch 0] Batch 221/300 (73.7%) | loss_ks: 0.3251 | loss_distill: 0.9756 | loss_ID: 0.3444 | ks_acc: 0.8600 | ID_acc: 0.5000 | elapsed: 2877.3s | LR: 4.11e-05
+[2026-01-18 17:34:22] [Epoch 0] Batch 231/300 (77.0%) | loss_ks: 0.3077 | loss_distill: 0.9623 | loss_ID: 0.5091 | ks_acc: 0.8400 | ID_acc: 0.4400 | elapsed: 3010.0s | LR: 4.42e-05
+[2026-01-18 17:36:39] [Epoch 0] Batch 241/300 (80.3%) | loss_ks: 0.4483 | loss_distill: 0.7768 | loss_ID: 0.3959 | ks_acc: 0.7200 | ID_acc: 0.4600 | elapsed: 3146.1s | LR: 4.74e-05
+[2026-01-18 17:38:52] [Epoch 0] Batch 251/300 (83.7%) | loss_ks: 0.3315 | loss_distill: 0.5387 | loss_ID: 0.4244 | ks_acc: 0.7600 | ID_acc: 0.5800 | elapsed: 3279.5s | LR: 4.74e-05
+[2026-01-18 17:41:11] [Epoch 0] Batch 261/300 (87.0%) | loss_ks: 0.3321 | loss_distill: 0.6252 | loss_ID: 0.6146 | ks_acc: 0.7400 | ID_acc: 0.5600 | elapsed: 3418.2s | LR: 5.05e-05
+[2026-01-18 17:43:26] [Epoch 0] Batch 271/300 (90.3%) | loss_ks: 0.4631 | loss_distill: 0.5419 | loss_ID: 0.3630 | ks_acc: 0.7200 | ID_acc: 0.5400 | elapsed: 3553.4s | LR: 5.05e-05
+[2026-01-18 17:45:41] [Epoch 0] Batch 281/300 (93.7%) | loss_ks: 0.4505 | loss_distill: 0.6063 | loss_ID: 0.4334 | ks_acc: 0.7200 | ID_acc: 0.5200 | elapsed: 3688.2s | LR: 5.37e-05
+[2026-01-18 17:47:55] [Epoch 0] Batch 291/300 (97.0%) | loss_ks: 0.1172 | loss_distill: 0.7332 | loss_ID: 0.5130 | ks_acc: 0.9200 | ID_acc: 0.5600 | elapsed: 3822.8s | LR: 5.68e-05
+[2026-01-18 17:49:57] ============================================================
+[2026-01-18 17:49:57] Epoch 0 completed | Total time: 3944.5s | Batches: 300
+[2026-01-18 17:49:57] ============================================================
+[2026-01-18 17:49:58] Model saved: output/TAKE_tiage_all_feats/model/0.pkl
+[2026-01-18 17:49:58] ============================================================
+[2026-01-18 17:49:58] Starting Epoch 1 | Total batches: 300 | Batch size: 1
+[2026-01-18 17:49:58] ============================================================
+[2026-01-18 17:50:11] [Epoch 1] Batch 1/300 (0.3%) | loss_ks: 0.0000 | loss_distill: 0.8317 | loss_ID: 0.6888 | ks_acc: 1.0000 | ID_acc: 0.6000 | elapsed: 13.6s | LR: 5.68e-05
+[2026-01-18 17:52:27] [Epoch 1] Batch 11/300 (3.7%) | loss_ks: 0.4419 | loss_distill: 1.0004 | loss_ID: 0.8037 | ks_acc: 0.7000 | ID_acc: 0.4200 | elapsed: 148.8s | LR: 6.00e-05
+[2026-01-18 17:54:42] [Epoch 1] Batch 21/300 (7.0%) | loss_ks: 0.1167 | loss_distill: 0.5356 | loss_ID: 0.4660 | ks_acc: 0.9200 | ID_acc: 0.6400 | elapsed: 283.7s | LR: 5.68e-05
+[2026-01-18 17:56:56] [Epoch 1] Batch 31/300 (10.3%) | loss_ks: 0.5293 | loss_distill: 0.4470 | loss_ID: 0.4721 | ks_acc: 0.7800 | ID_acc: 0.5600 | elapsed: 418.1s | LR: 5.68e-05
+[2026-01-18 17:59:10] [Epoch 1] Batch 41/300 (13.7%) | loss_ks: 0.3376 | loss_distill: 1.1703 | loss_ID: 0.5900 | ks_acc: 0.7600 | ID_acc: 0.4800 | elapsed: 551.8s | LR: 5.37e-05
+[2026-01-18 18:01:24] [Epoch 1] Batch 51/300 (17.0%) | loss_ks: 0.2205 | loss_distill: 1.2087 | loss_ID: 0.6447 | ks_acc: 0.8600 | ID_acc: 0.4800 | elapsed: 686.1s | LR: 5.37e-05
+[2026-01-18 18:03:38] [Epoch 1] Batch 61/300 (20.3%) | loss_ks: 0.5601 | loss_distill: 0.7813 | loss_ID: 0.4803 | ks_acc: 0.6800 | ID_acc: 0.4600 | elapsed: 819.8s | LR: 5.05e-05
+[2026-01-18 18:05:52] [Epoch 1] Batch 71/300 (23.7%) | loss_ks: 0.5594 | loss_distill: 0.7295 | loss_ID: 0.4635 | ks_acc: 0.7000 | ID_acc: 0.4600 | elapsed: 953.7s | LR: 4.74e-05
+[2026-01-18 18:08:06] [Epoch 1] Batch 81/300 (27.0%) | loss_ks: 0.3317 | loss_distill: 0.5211 | loss_ID: 0.2870 | ks_acc: 0.8200 | ID_acc: 0.6200 | elapsed: 1087.9s | LR: 4.74e-05
+[2026-01-18 18:10:19] [Epoch 1] Batch 91/300 (30.3%) | loss_ks: 0.2064 | loss_distill: 0.4453 | loss_ID: 0.3194 | ks_acc: 0.9000 | ID_acc: 0.6400 | elapsed: 1221.6s | LR: 4.42e-05
+[2026-01-18 18:12:33] [Epoch 1] Batch 101/300 (33.7%) | loss_ks: 0.0980 | loss_distill: 0.5795 | loss_ID: 0.3640 | ks_acc: 0.9600 | ID_acc: 0.6800 | elapsed: 1355.4s | LR: 4.11e-05
+[2026-01-18 18:14:47] [Epoch 1] Batch 111/300 (37.0%) | loss_ks: 0.5737 | loss_distill: 0.6345 | loss_ID: 0.3132 | ks_acc: 0.6000 | ID_acc: 0.5400 | elapsed: 1489.6s | LR: 4.11e-05
+[2026-01-18 18:17:01] [Epoch 1] Batch 121/300 (40.3%) | loss_ks: 0.4352 | loss_distill: 0.4034 | loss_ID: 0.2624 | ks_acc: 0.7600 | ID_acc: 0.5800 | elapsed: 1623.4s | LR: 3.79e-05
+[2026-01-18 18:19:16] [Epoch 1] Batch 131/300 (43.7%) | loss_ks: 0.3499 | loss_distill: 0.5285 | loss_ID: 0.4053 | ks_acc: 0.7600 | ID_acc: 0.5800 | elapsed: 1757.8s | LR: 3.79e-05
+[2026-01-18 18:21:30] [Epoch 1] Batch 141/300 (47.0%) | loss_ks: 0.2189 | loss_distill: 0.7478 | loss_ID: 0.4631 | ks_acc: 0.8600 | ID_acc: 0.6000 | elapsed: 1891.6s | LR: 3.47e-05
+[2026-01-18 18:23:43] [Epoch 1] Batch 151/300 (50.3%) | loss_ks: 0.3356 | loss_distill: 0.8403 | loss_ID: 0.5650 | ks_acc: 0.8000 | ID_acc: 0.5600 | elapsed: 2025.5s | LR: 3.16e-05
+[2026-01-18 18:25:58] [Epoch 1] Batch 161/300 (53.7%) | loss_ks: 0.3408 | loss_distill: 0.4259 | loss_ID: 0.2533 | ks_acc: 0.7600 | ID_acc: 0.6200 | elapsed: 2159.8s | LR: 3.16e-05
+[2026-01-18 18:28:12] [Epoch 1] Batch 171/300 (57.0%) | loss_ks: 0.5374 | loss_distill: 0.4098 | loss_ID: 0.3363 | ks_acc: 0.7600 | ID_acc: 0.5400 | elapsed: 2293.7s | LR: 2.84e-05
+[2026-01-18 18:30:25] [Epoch 1] Batch 181/300 (60.3%) | loss_ks: 0.6465 | loss_distill: 0.6703 | loss_ID: 0.5339 | ks_acc: 0.6600 | ID_acc: 0.4800 | elapsed: 2427.5s | LR: 2.53e-05
+[2026-01-18 18:32:40] [Epoch 1] Batch 191/300 (63.7%) | loss_ks: 0.3297 | loss_distill: 1.0188 | loss_ID: 0.8415 | ks_acc: 0.8000 | ID_acc: 0.5400 | elapsed: 2561.9s | LR: 2.53e-05
+[2026-01-18 18:34:54] [Epoch 1] Batch 201/300 (67.0%) | loss_ks: 0.4578 | loss_distill: 0.7217 | loss_ID: 0.2958 | ks_acc: 0.7200 | ID_acc: 0.5400 | elapsed: 2695.7s | LR: 2.21e-05
+[2026-01-18 18:37:08] [Epoch 1] Batch 211/300 (70.3%) | loss_ks: 0.3404 | loss_distill: 0.9784 | loss_ID: 0.4463 | ks_acc: 0.8000 | ID_acc: 0.5600 | elapsed: 2830.1s | LR: 2.21e-05
+[2026-01-18 18:39:22] [Epoch 1] Batch 221/300 (73.7%) | loss_ks: 0.1096 | loss_distill: 0.9083 | loss_ID: 0.6134 | ks_acc: 0.9400 | ID_acc: 0.6200 | elapsed: 2964.0s | LR: 1.89e-05
+[2026-01-18 18:41:36] [Epoch 1] Batch 231/300 (77.0%) | loss_ks: 0.4474 | loss_distill: 0.8808 | loss_ID: 0.6255 | ks_acc: 0.7200 | ID_acc: 0.5600 | elapsed: 3097.7s | LR: 1.58e-05
+[2026-01-18 18:43:50] [Epoch 1] Batch 241/300 (80.3%) | loss_ks: 0.2112 | loss_distill: 0.6149 | loss_ID: 0.3368 | ks_acc: 0.8800 | ID_acc: 0.6400 | elapsed: 3232.1s | LR: 1.58e-05
+[2026-01-18 18:46:04] [Epoch 1] Batch 251/300 (83.7%) | loss_ks: 0.5728 | loss_distill: 0.6183 | loss_ID: 0.4900 | ks_acc: 0.6000 | ID_acc: 0.5400 | elapsed: 3366.0s | LR: 1.26e-05
+[2026-01-18 18:48:18] [Epoch 1] Batch 261/300 (87.0%) | loss_ks: 0.3312 | loss_distill: 0.7868 | loss_ID: 0.4298 | ks_acc: 0.8200 | ID_acc: 0.5200 | elapsed: 3499.9s | LR: 9.47e-06
+[2026-01-18 18:50:32] [Epoch 1] Batch 271/300 (90.3%) | loss_ks: 0.4504 | loss_distill: 0.4033 | loss_ID: 0.2237 | ks_acc: 0.7400 | ID_acc: 0.6000 | elapsed: 3634.2s | LR: 9.47e-06
+[2026-01-18 18:52:46] [Epoch 1] Batch 281/300 (93.7%) | loss_ks: 0.4514 | loss_distill: 0.7391 | loss_ID: 0.4693 | ks_acc: 0.6800 | ID_acc: 0.5200 | elapsed: 3768.0s | LR: 6.32e-06
+[2026-01-18 18:55:00] [Epoch 1] Batch 291/300 (97.0%) | loss_ks: 0.4358 | loss_distill: 0.6401 | loss_ID: 0.4507 | ks_acc: 0.7200 | ID_acc: 0.5400 | elapsed: 3902.4s | LR: 6.32e-06
+[2026-01-18 18:57:01] ============================================================
+[2026-01-18 18:57:01] Epoch 1 completed | Total time: 4022.8s | Batches: 300
+[2026-01-18 18:57:01] ============================================================
+[2026-01-18 18:57:02] Model saved: output/TAKE_tiage_all_feats/model/1.pkl

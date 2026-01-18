@@ -364,7 +364,8 @@ class TAKE(nn.Module):
                 curr_ratio = max(init_ratio * (1 - self.args.anneal_rate * (epoch - self.args.switch_ID)), self.args.min_ratio)
                 dis_selected = s_shift_prob.max(1)[1]
                 for i in range(len(dis)):
-                    coin = np.random.choice(2, 1, p=[curr_ratio, 1-curr_ratio])[0]
+                    # 用 PyTorch random 替换 np.random.choice
+                    coin = 0 if torch.rand(1).item() < curr_ratio else 1
                     if coin == 0:
                         pass
                     else:
@@ -412,10 +413,10 @@ class TAKE(nn.Module):
         _, inherited_ks_pred = memory['topic_inherited_dist'].detach().max(1)  # [batch * max_episode_length]
         _, ID_pred = memory['s_shift_prob'].detach().max(1)  # [batch * max_episode_length]
         
-        final_ks_acc = accuracy_score(data['knowledge_label'].reshape(-1).cpu(), final_ks_pred.cpu(), sample_weight=data['episode_mask'].reshape(-1).cpu())
-        shifted_ks_acc = accuracy_score(data['knowledge_label'].reshape(-1).cpu(), shifted_ks_pred.cpu(), sample_weight=data['episode_mask'].reshape(-1).cpu())
-        inherited_ks_acc = accuracy_score(data['knowledge_label'].reshape(-1).cpu(), inherited_ks_pred.cpu(), sample_weight=data['episode_mask'].reshape(-1).cpu())
-        ID_acc = accuracy_score(data['Initiative_label'].reshape(-1).cpu(), ID_pred.cpu(), sample_weight=data['episode_mask'].reshape(-1).cpu())
+        final_ks_acc = accuracy_score(data['knowledge_label'].reshape(-1).detach().cpu(), final_ks_pred.detach().cpu(), sample_weight=data['episode_mask'].reshape(-1).detach().cpu())
+        shifted_ks_acc = accuracy_score(data['knowledge_label'].reshape(-1).detach().cpu(), shifted_ks_pred.detach().cpu(), sample_weight=data['episode_mask'].reshape(-1).detach().cpu())
+        inherited_ks_acc = accuracy_score(data['knowledge_label'].reshape(-1).detach().cpu(), inherited_ks_pred.detach().cpu(), sample_weight=data['episode_mask'].reshape(-1).detach().cpu())
+        ID_acc = accuracy_score(data['Initiative_label'].reshape(-1).detach().cpu(), ID_pred.detach().cpu(), sample_weight=data['episode_mask'].reshape(-1).detach().cpu())
         
         # Initiative dis loss
         masked_Initiative_label = data['Initiative_label'].reshape(-1).masked_fill(~data['episode_mask'].reshape(-1), -1) # [batch * max_episode_length]

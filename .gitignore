@@ -26,14 +26,14 @@ env/
 .venv/
 ENV/
 
-# PyTorch 模型檔案
-*.pkl
-*.pt
-*.pth
-*.bin
+# PyTorch 模型檔案 (已临时取消以提交模型)
+# *.pkl
+# *.pt
+# *.pth
+# *.bin
 
-# 日誌與暫存檔案
-*.log
+# 日誌與暫存檔案 (已临时取消以提交日志)
+# *.log
 *.tmp
 *.cache
 

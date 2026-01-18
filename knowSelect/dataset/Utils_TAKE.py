@@ -188,10 +188,22 @@ def split_data(dataset, split_file, episodes):
         train, dev, test = load_split(dataset, split_file)
         test_episodes = list()
         for episode in episodes:
-            if episode[0]['query_id'] in train:
+            # episode[0]['query_id'] 格式如 "182_0"，与 split 文件中的 ID 匹配
+            first_query_id = episode[0]['query_id']
+            if first_query_id in train:
                 train_episodes.append(episode)
-            elif episode[0]['query_id'] in test:
+            elif first_query_id in test:
                 test_episodes.append(episode)
+            else:
+                # 如果首个 turn 不在任何集合中，检查对话 ID 前缀
+                dialog_prefix = first_query_id.rsplit("_", 1)[0]
+                # 检查任何以该前缀开始的 ID 是否在训练/测试集中
+                is_test = any(qid.startswith(dialog_prefix + "_") for qid in test)
+                is_train = any(qid.startswith(dialog_prefix + "_") for qid in train)
+                if is_test and not is_train:
+                    test_episodes.append(episode)
+                else:
+                    train_episodes.append(episode)
         return train_episodes, dev_episodes, test_episodes
 
 

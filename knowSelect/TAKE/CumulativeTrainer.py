@@ -467,18 +467,18 @@ class CumulativeTrainer(object):
             accumulative_knowledge_label = torch.cat(accumulative_knowledge_label, dim=0)
             accumulative_ID_label = torch.cat(accumulative_ID_label, dim=0)
             accumulative_episode_mask = torch.cat(accumulative_episode_mask, dim=0)
-            accumulative_final_ks_acc = accuracy_score(accumulative_knowledge_label.cpu(), accumulative_final_ks_pred.cpu(), sample_weight=accumulative_episode_mask.cpu())
-            accumulative_shift_ks_acc = accuracy_score(accumulative_knowledge_label.cpu(), accumulative_shift_ks_pred.cpu(), sample_weight=accumulative_episode_mask.cpu())
-            accumulative_inherit_ks_acc = accuracy_score(accumulative_knowledge_label.cpu(), accumulative_inherit_ks_pred.cpu(), sample_weight=accumulative_episode_mask.cpu())
+            accumulative_final_ks_acc = accuracy_score(accumulative_knowledge_label.detach().cpu(), accumulative_final_ks_pred.detach().cpu(), sample_weight=accumulative_episode_mask.detach().cpu())
+            accumulative_shift_ks_acc = accuracy_score(accumulative_knowledge_label.detach().cpu(), accumulative_shift_ks_pred.detach().cpu(), sample_weight=accumulative_episode_mask.detach().cpu())
+            accumulative_inherit_ks_acc = accuracy_score(accumulative_knowledge_label.detach().cpu(), accumulative_inherit_ks_pred.detach().cpu(), sample_weight=accumulative_episode_mask.detach().cpu())
 
             with open(os.path.join(output_path + '/ks_pred/', epoch + "_ks_pred.json"), 'w', encoding='utf-8') as w:
                 json.dump(accumulative_final_ks_pred.tolist(), w)
 
-            accumulative_ID_acc = accuracy_score(accumulative_ID_label.cpu(), accumulative_ID_pred.cpu(), sample_weight=accumulative_episode_mask.cpu())
+            accumulative_ID_acc = accuracy_score(accumulative_ID_label.detach().cpu(), accumulative_ID_pred.detach().cpu(), sample_weight=accumulative_episode_mask.detach().cpu())
 
             valid_mask = (accumulative_episode_mask == 1) & (accumulative_ID_label != -1)
-            valid_true = accumulative_ID_label[valid_mask].cpu().numpy()
-            valid_pred = accumulative_ID_pred[valid_mask].cpu().numpy()
+            valid_true = accumulative_ID_label[valid_mask].detach().cpu().numpy()
+            valid_pred = accumulative_ID_pred[valid_mask].detach().cpu().numpy()
             precision, recall, f1, _ = precision_recall_fscore_support(
                 valid_true, valid_pred, average='binary', zero_division=0
             )
